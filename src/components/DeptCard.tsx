@@ -2,21 +2,30 @@ import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, deptColors } from '../theme/tokens';
+import type { EmergencyDepartment } from '../types';
 
-const ICONS = {
+type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
+
+const ICONS: Record<string, IoniconName> = {
   shield: 'shield-checkmark-outline',
   fire: 'flame-outline',
   'kit-medical': 'medkit-outline',
   'alert-triangle': 'warning-outline',
 };
 
-export default function DeptCard({ department, onPressCall }) {
+interface DeptCardProps {
+  department: EmergencyDepartment;
+  onPressCall: (department: EmergencyDepartment) => void;
+}
+
+export default function DeptCard({ department, onPressCall }: DeptCardProps) {
   const accent = deptColors(department.key);
+  const iconName = ICONS[department.icon] || 'help-circle-outline';
 
   return (
-    <View style={[styles.card, { borderLeftColor: accent.color }]}>
-      <View style={[styles.iconWrap, { backgroundColor: accent.tint }]}>
-        <Ionicons name={ICONS[department.icon] || 'help-circle-outline'} size={20} color={accent.color} />
+    <View style={[styles.card, { borderLeftColor: accent.color }]}> 
+      <View style={[styles.iconWrap, { backgroundColor: accent.tint }]}> 
+        <Ionicons name={iconName} size={20} color={accent.color} />
       </View>
 
       <View style={styles.body}>

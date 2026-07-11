@@ -1,32 +1,36 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, ScrollView, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useApp } from '../context/AppContext';
 import { detectCity, LOCATION_MESSAGES } from '../services/location';
 import { findCity } from '../data/emergencyNumbers';
 import PulseIndicator from '../components/PulseIndicator';
 import EmptyState from '../components/EmptyState';
 import { colors, radius, type } from '../theme/tokens';
+import type { HomeStackParamList, LocationDetectionResult } from '../types';
 
 const QUICK_CITIES = ['Harare', 'Bulawayo', 'Mutare', 'Gweru'];
 
-export default function HomeScreen({ navigation }) {
+type HomeScreenProps = NativeStackScreenProps<HomeStackParamList, 'HomeMain'>;
+
+export default function HomeScreen({ navigation }: HomeScreenProps) {
   const { isOnline, profile } = useApp();
-  const [locState, setLocState] = useState({ status: 'loading' });
+  const [locState, setLocState] = useState<LocationDetectionResult>({ status: 'loading' });
   const [searchText, setSearchText] = useState('');
-  const [notFound, setNotFound] = useState(null); // holds the query that had no match
+  const [notFound, setNotFound] = useState<string | null>(null);
 
   const runDetection = useCallback(() => {
     if (!isOnline) return;
     setLocState({ status: 'loading' });
-    detectCity().then(setLocState);
+    void detectCity().then(setLocState);
   }, [isOnline]);
 
   useEffect(() => {
     runDetection();
   }, [runDetection]);
 
-  function goToCity(name) {
+  function goToCity(name: string) {
     const trimmed = name.trim();
     if (!trimmed) return;
     const city = findCity(trimmed);
@@ -34,7 +38,6 @@ export default function HomeScreen({ navigation }) {
       setNotFound(null);
       navigation.navigate('Results', { city });
     } else {
-      // No blank/broken navigation — surface it right where the user is.
       setNotFound(trimmed);
     }
   }
@@ -60,7 +63,15 @@ export default function HomeScreen({ navigation }) {
       );
     }
 
-    const msg = LOCATION_MESSAGES[locState.status] || LOCATION_MESSAGES.error;
+    const msg =
+      locState.status === 'services-disabled' ||
+      locState.status === 'permission-denied' ||
+      locState.status === 'timeout' ||
+      locState.status === 'geocode-empty' ||
+      locState.status === 'error'
+        ? LOCATION_MESSAGES[locState.status]
+        : LOCATION_MESSAGES.error;
+
     return (
       <EmptyState
         icon={locState.status === 'permission-denied' || locState.status === 'services-disabled' ? 'lock-closed-outline' : 'navigate-outline'}
@@ -149,7 +160,10 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.savedLabel}>Default location</Text>
           <Text style={styles.savedPlace}>{profile?.city || 'Not set'}</Text>
         </View>
-        <Pressable onPress={() => navigation.navigate('Profile')}>
+        <Pressable onPress={() => {
+          const parentNavigator = navigation.getParent() as { navigate: (screen: string) => void } | undefined;
+          parentNavigator?.navigate('Profile');
+        }}>
           <Text style={styles.linkBtn}>Set up</Text>
         </Pressable>
       </View>

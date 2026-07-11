@@ -1,12 +1,17 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import NetInfo from '@react-native-community/netinfo';
 import { getProfile, saveProfile as persistProfile } from '../services/storage';
+import type { AppContextValue, Profile } from '../types';
 
-const AppContext = createContext(null);
+const AppContext = createContext<AppContextValue | null>(null);
 
-export function AppProvider({ children }) {
+interface AppProviderProps {
+  children: React.ReactNode;
+}
+
+export function AppProvider({ children }: AppProviderProps) {
   const [isOnline, setIsOnline] = useState(true);
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
 
   useEffect(() => {
@@ -17,13 +22,11 @@ export function AppProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    getProfile()
-      .then(setProfile)
-      .finally(() => setLoadingProfile(false));
+    void getProfile().then(setProfile).finally(() => setLoadingProfile(false));
   }, []);
 
-  const updateProfile = useCallback(async (next) => {
-    setProfile(next); // optimistic — profile is local-first
+  const updateProfile = useCallback(async (next: Profile | null) => {
+    setProfile(next);
     await persistProfile(next);
   }, []);
 

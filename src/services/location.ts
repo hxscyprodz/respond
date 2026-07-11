@@ -1,37 +1,30 @@
 import * as Location from 'expo-location';
-
-// Structured result instead of null/throw, so the UI can show a specific,
-// actionable message for each failure mode rather than one generic error.
-// Every branch resolves (never rejects) — location is a convenience path,
-// it must never be able to crash or hang the app.
+import type { LocationDetectionResult, LocationStatus } from '../types';
 
 const DETECT_TIMEOUT_MS = 8000;
 
-function timeout(ms) {
-  return new Promise((resolve) =>
-    setTimeout(() => resolve({ status: 'timeout' }), ms)
-  );
+function timeout(ms: number): Promise<LocationDetectionResult> {
+  return new Promise((resolve) => setTimeout(() => resolve({ status: 'timeout' }), ms));
 }
 
-export async function detectCity() {
+export async function detectCity(): Promise<LocationDetectionResult> {
   try {
     const servicesEnabled = await Location.hasServicesEnabledAsync();
     if (!servicesEnabled) {
       return { status: 'services-disabled' };
     }
 
-    const { status: permStatus, canAskAgain } =
-      await Location.requestForegroundPermissionsAsync();
+    const { status: permStatus, canAskAgain } = await Location.requestForegroundPermissionsAsync();
     if (permStatus !== 'granted') {
       return { status: 'permission-denied', canAskAgain };
     }
 
-    const result = await Promise.race([
+    const result = await Promise.race<Location.LocationObject | LocationDetectionResult>([
       Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }),
       timeout(DETECT_TIMEOUT_MS),
     ]);
 
-    if (result?.status === 'timeout') {
+    if ('status' in result) {
       return { status: 'timeout' };
     }
 
@@ -45,16 +38,14 @@ export async function detectCity() {
       return { status: 'geocode-empty' };
     }
 
-    return { status: 'success', city, region: place.country };
-  } catch (e) {
-    console.warn('Location detection failed', e);
+    return { status: 'success', city, region: place?.country ?? undefined };
+  } catch (error) {
+    console.warn('Location detection failed', error);
     return { status: 'error' };
   }
 }
 
-// Human-facing copy for each status, kept alongside the service so the
-// wording stays consistent anywhere it's shown.
-export const LOCATION_MESSAGES = {
+export const LOCATION_MESSAGES: Record<Exclude<LocationStatus, 'loading' | 'success'>, { title: string; body: string; action: 'openSettings' | 'retry' }> = {
   'services-disabled': {
     title: 'Location services are off',
     body: 'Turn on location for this device to auto-detect your area, or search a city manually.',
