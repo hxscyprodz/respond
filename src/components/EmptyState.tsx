@@ -3,10 +3,18 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../theme/tokens';
 
-// Reusable empty/error state block. Used for location failures and
-// for "no results" on a city search — anywhere the screen would
-// otherwise just look blank or broken.
-export default function EmptyState({ icon = 'alert-circle-outline', title, body, actionLabel, onAction, tone = 'neutral' }) {
+type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
+
+interface EmptyStateProps {
+  icon?: IoniconName;
+  title: string;
+  body?: string;
+  actionLabel?: string;
+  onAction?: () => void;
+  tone?: 'neutral' | 'warning';
+}
+
+export default function EmptyState({ icon = 'alert-circle-outline', title, body, actionLabel, onAction, tone = 'neutral' }: EmptyStateProps) {
   const iconColor = tone === 'warning' ? colors.fire : colors.inkSoft;
 
   return (

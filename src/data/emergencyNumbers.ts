@@ -1,12 +1,6 @@
-// Bundled offline directory. Shape mirrors what the contacts directory
-// service returns, so swapping the data source for a real API later
-// (see services/directory.js) requires no changes in the UI layer.
-//
-// In production this file is replaced by a versioned dataset downloaded
-// from the CDN/edge cache and stored via services/storage.js, refreshed
-// on a delta-sync schedule from the backend.
+import type { EmergencyCity } from '../types';
 
-export const EMERGENCY_DIRECTORY = {
+export const EMERGENCY_DIRECTORY: Record<string, EmergencyCity> = {
   harare: {
     display: 'Harare',
     region: 'Zimbabwe',
@@ -48,14 +42,8 @@ export const EMERGENCY_DIRECTORY = {
   },
 };
 
-// Sample data for prototype purposes only — not verified for real use.
-// A production build sources and version-controls this from the
-// contacts directory service, with an editorial review workflow.
-
-export function findCity(query) {
+export function findCity(query: string): EmergencyCity | undefined {
   const key = query.trim().toLowerCase();
   if (EMERGENCY_DIRECTORY[key]) return EMERGENCY_DIRECTORY[key];
-  return Object.values(EMERGENCY_DIRECTORY).find(
-    (c) => c.display.toLowerCase() === key
-  );
+  return Object.values(EMERGENCY_DIRECTORY).find((city) => city.display.toLowerCase() === key);
 }

@@ -1,4 +1,6 @@
-export const colors = {
+import type { DepartmentKey } from '../types';
+
+export const colors: Record<string, string> = {
   paper: '#F6F4EF',
   paperRaised: '#FFFFFF',
   ink: '#181A1C',
@@ -21,16 +23,15 @@ export const colors = {
 export const radius = { sm: 10, md: 14, lg: 18 };
 
 export const type = {
-  title: { fontSize: 20, fontWeight: '600' },
-  body: { fontSize: 14, fontWeight: '400' },
-  sub: { fontSize: 13, fontWeight: '400', color: colors.inkSoft },
-  label: { fontSize: 12, fontWeight: '500', color: colors.inkSoft },
-  number: { fontSize: 16, fontWeight: '600' },
+  title: { fontSize: 20, fontWeight: '600' as const },
+  body: { fontSize: 14, fontWeight: '400' as const },
+  sub: { fontSize: 13, fontWeight: '400' as const, color: colors.inkSoft },
+  label: { fontSize: 12, fontWeight: '500' as const, color: colors.inkSoft },
+  number: { fontSize: 16, fontWeight: '600' as const },
 };
 
-// department key -> accent color, used consistently across cards and dial sheet
-export function deptColors(key) {
-  const map = {
+export function deptColors(key: DepartmentKey | string) {
+  const map: Record<string, { color: string; tint: string }> = {
     police: { color: colors.police, tint: colors.policeTint },
     fire: { color: colors.fire, tint: colors.fireTint },
     ambulance: { color: colors.ambulance, tint: colors.ambulanceTint },

@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, Pressable, StyleSheet, ScrollView, Linking } from 'react-native';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DeptCard from '../components/DeptCard';
 import { colors, radius, type } from '../theme/tokens';
+import type { EmergencyDepartment, HomeStackParamList } from '../types';
 
-export default function ResultsScreen({ route, navigation }) {
-  const { city } = route.params || {};
-  const [selected, setSelected] = useState(null);
+type ResultsScreenProps = NativeStackScreenProps<HomeStackParamList, 'Results'>;
+
+export default function ResultsScreen({ route, navigation }: ResultsScreenProps) {
+  const { city } = route.params;
+  const [selected, setSelected] = useState<EmergencyDepartment | null>(null);
 
   if (!city) {
-    // Defensive guard — shouldn't be reachable since Home only navigates
-    // here on a confirmed match, but a blank screen is never acceptable
-    // in an emergency app if something upstream changes.
     return (
       <View style={styles.screen}>
         <Text style={type.title}>Something went wrong</Text>
@@ -24,9 +25,7 @@ export default function ResultsScreen({ route, navigation }) {
 
   function confirmCall() {
     if (!selected) return;
-    // Native dialer — this is the "straight from the app" requirement.
-    // tel: works identically on iOS and Android via Linking.
-    Linking.openURL(`tel:${selected.number.replace(/\s/g, '')}`);
+    void Linking.openURL(`tel:${selected.number.replace(/\s/g, '')}`);
     setSelected(null);
   }
 

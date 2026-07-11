@@ -9,9 +9,10 @@ import HomeScreen from './src/screens/HomeScreen';
 import ResultsScreen from './src/screens/ResultsScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import { colors } from './src/theme/tokens';
+import type { AppTabParamList, HomeStackParamList } from './src/types';
 
-const HomeStack = createNativeStackNavigator();
-const Tab = createBottomTabNavigator();
+const HomeStack = createNativeStackNavigator<HomeStackParamList>();
+const Tab = createBottomTabNavigator<AppTabParamList>();
 
 function HomeStackScreen() {
   return (
@@ -33,8 +34,8 @@ export default function App() {
             tabBarInactiveTintColor: colors.inkFaint,
             tabBarStyle: { backgroundColor: colors.paperRaised, borderTopColor: colors.line },
             tabBarIcon: ({ color, size }) => {
-              const icons = { Home: 'home-outline', Profile: 'person-outline' };
-              return <Ionicons name={icons[route.name]} size={size} color={color} />;
+              const iconName = route.name === 'Home' ? 'home-outline' : 'person-outline';
+              return <Ionicons name={iconName} size={size} color={color} />;
             },
           })}
         >

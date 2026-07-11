@@ -5,10 +5,11 @@ import { colors } from '../theme/tokens';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-// Steady moving wave when online, still dashed line when offline.
-// This is the one deliberately expressive element in the UI — everywhere
-// else stays quiet so this reads clearly as "here is your connection state".
-export default function PulseIndicator({ online }) {
+interface PulseIndicatorProps {
+  online: boolean;
+}
+
+export default function PulseIndicator({ online }: PulseIndicatorProps) {
   const offset = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -21,12 +22,12 @@ export default function PulseIndicator({ online }) {
         toValue: -40,
         duration: 1800,
         easing: Easing.linear,
-        useNativeDriver: false, // strokeDashoffset isn't supported by native driver
+        useNativeDriver: false,
       })
     );
     loop.start();
     return () => loop.stop();
-  }, [online]);
+  }, [offset, online]);
 
   return (
     <View style={styles.wrap}>

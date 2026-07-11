@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { colors, radius, type } from '../theme/tokens';
+import type { Profile } from '../types';
 
 export default function ProfileScreen() {
   const { profile, updateProfile } = useApp();
@@ -11,7 +12,8 @@ export default function ProfileScreen() {
 
   async function handleSave() {
     if (!city.trim()) return;
-    await updateProfile({ name: name.trim(), city: city.trim() });
+    const nextProfile: Profile = { name: name.trim(), city: city.trim() };
+    await updateProfile(nextProfile);
     setSavedFlash(true);
     setTimeout(() => setSavedFlash(false), 2500);
   }
